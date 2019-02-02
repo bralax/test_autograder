@@ -262,15 +262,19 @@ public class Autograder {
          programs[i] = new Program(args[2 * i], args[2 * i + 1]);
          if (!gr.testSourceExists(programs[i].name()) ||
              !gr.testCompiles(programs[i].name())) {
-            gr.testRunFinished();
-            return;
+            programs[i].setExists(false);
+         } else {
+            gr.testCheckstyle(programs[i].name());
          }
-         gr.testCheckstyle(programs[i].name());
       }
       for (int i = 0; i < programs.length; i++) {
-         gr.diffTests(programs[i]);
+         if (programs[i].exists()) {
+            gr.diffTests(programs[i]);
+         }
       }
-      gr.p1aRun();
+      if (programs[0].exists()) {
+         gr.p1aRun();
+      }
       gr.testRunFinished();
    }
 
@@ -285,6 +289,9 @@ public class Autograder {
       /**The number of cooresponding diff tests.*/
       private int testCount;
       
+      /**Whether the file exists in the submission.*/
+      private boolean exists;
+
       /**
          Public constructor of the class.
          @param newName the name of the program
@@ -293,8 +300,23 @@ public class Autograder {
       Program(String newName, String count) {
          this.name = newName;
          this.testCount = Integer.parseInt(count);
+         this.exists = true;
       }
       
+      /**
+         returns whether the file exists.
+         @return exists
+       */
+      public boolean exists() {
+         return this.exists;
+      }
+
+      /** Set whether a submission file exists.
+          @param b whether it exists
+       */
+      public void setExists(boolean b) {
+         this.exists = b;
+      }
 
       /**
          Getter for the name.
